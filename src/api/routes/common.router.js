@@ -2,7 +2,11 @@ import express from "express";
 import {
   viewAllCars,
   viewCarsInDealership,
-} from "../controllers/common/viewCars";
+} from "../controllers/common/viewCars.js";
+import {
+  addVehicleAfterDeal,
+  viewDealsFromDealership,
+} from "../controllers/common/deals.js";
 const router = express.Router();
 
 router.get("/cars", viewAllCars);

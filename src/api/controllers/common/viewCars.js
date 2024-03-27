@@ -1,4 +1,4 @@
-import { getDatabase } from "../../../config/database";
+import { getDatabase } from "../../../config/database.js";
 const db = getDatabase();
 
 export const viewAllCars = async (req, res) => {

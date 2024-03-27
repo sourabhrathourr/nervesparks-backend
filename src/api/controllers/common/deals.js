@@ -1,4 +1,4 @@
-import { getDatabase } from "../../../config/database";
+import { getDatabase } from "../../../config/database.js";
 import { ObjectId } from "mongodb";
 
 const db = getDatabase();
@@ -44,6 +44,61 @@ export const addVehicleAfterDeal = async (req, res) => {
     res.status(200).json({ message: "Vehicle added to user and dealership" });
   } catch (err) {
     console.error("Error adding vehicle after deal:", err);
+    res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+export const viewDealsFromDealership = async (req, res) => {
+  try {
+    const { dealershipId } = req.params;
+
+    // 1. Find the dealership
+    const dealershipsCollection = db.collection("dealerships");
+    const dealership = await dealershipsCollection.findOne({
+      _id: new ObjectId(dealershipId),
+    });
+
+    if (!dealership) {
+      return res.status(404).json({ error: "Dealership not found" });
+    }
+
+    // 2. Get all deals from the dealership
+    const dealsCollection = db.collection("deals");
+    const deals = await dealsCollection
+      .find({ sellerId: new ObjectId(dealershipId) })
+      .toArray();
+
+    // 3. Populate deal information with user and car details
+    const populatedDeals = await Promise.all(
+      deals.map(async (deal) => {
+        const user = await db.collection("users").findOne({
+          _id: new ObjectId(deal.buyerId),
+        });
+
+        const car = await db.collection("cars").findOne({
+          _id: new ObjectId(deal.carId),
+        });
+
+        return {
+          ...deal,
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.user_email,
+          },
+          car: {
+            _id: car._id,
+            make: car.make,
+            model: car.model,
+            year: car.year,
+          },
+        };
+      }),
+    );
+
+    res.status(200).json(populatedDeals);
+  } catch (err) {
+    console.error("Error viewing deals from dealership:", err);
     res.status(500).json({ error: "An error occurred" });
   }
 };

@@ -1,7 +1,4 @@
-export const soldVehicleSchema = {
-  vehicle_id: {
-    type: String,
-  },
+export const soldVehicleSchema ={ 
   car_id: {
     type: String,
   },
